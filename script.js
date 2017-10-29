@@ -3,30 +3,41 @@ window.addEventListener('load', init);
 function init() {
     document.getElementById("button").addEventListener('click', addItem);
     displayItems();
+    displayTotalNumberOfTasks();
 }
 
 
-//function addItem() {
-//    var userInput = document.getElementById("input");
-//    var newContent = document.createTextNode(userInput.value);
-//
-//    var checkBox = document.createElement("input");
-//    checkBox.setAttribute("type", "checkbox");
-//    checkBox.addEventListener('change', removeItem);
-//
-//    var label = document.createElement("label");
-//    label.appendChild(newContent);
-//
-//    var newLi = document.createElement("li");
-//    newLi.appendChild(checkBox);
-//    newLi.appendChild(label);
-//
-//    document.getElementById("list").appendChild(newLi);
-//    userInput.value = "";
-//
-//}
+function removeItem(event) {
+    deleteTask("123").then(
+        function () {
+            event.target.parentNode.remove()
+        }
+    ).catch(function (e) {
+        console.log(e);
+    })
 
-function addItem(description) {
+}
+
+function deleteTask(taskId) {
+    var url = "https://my.api.mockaroo.com/deleteresponse/" + taskId + ".json?key=835b6af0";
+    return makeDeleteRequest(url);
+}
+
+
+function displayItems() {
+
+    getTasks().then(
+        function (tasks) {
+            for (var i = 0; i < tasks.length; i++) {
+                displayItem(tasks[i].description);
+            }
+        }
+    ).catch(function (e) {
+        console.log(e);
+    })
+}
+
+function displayItem(description) {
     var newContent = document.createTextNode(description);
 
     var checkBox = document.createElement("input");
@@ -44,84 +55,107 @@ function addItem(description) {
 
 }
 
-
-function removeItem(event) {
-    event.target.parentNode.remove();
+function getTasks() {
+    var url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
+    return makeGetRequest(url);
 }
 
-function editItem() {
+function addItem() {
+    var todo = createItem();
+    createTask(todo).then(
+        function () {
+            displayItem(todo.description);
+        }
+    ).catch(function (e) {
+        console.log(e);
+    })
+
 
 }
 
-function createTask() {
-    var data = {
+function createTask(data) {
+    var url = "https://my.api.mockaroo.com/createresponse.json?key=835b6af0";
+    return makePostRequest(url, data);
+}
+
+function createItem() {
+    var item = {
         "name": getName(),
         "email": getEmail(),
         "description": getDescription(),
         "timeEstimate": getTimeEstimate(),
         "dueDate": getDueDate()
     };
-
-    var url;
-    makePostRequest(data);
-}
-
-function displayItems() {
-
-    var promisedTasks = getTasks();
-    promisedTasks.then(
-        function (tasks) {
-            for (var i = 0; i < tasks.length; i++) {
-                addItem(tasks[i].description);
-            }
-        }
-    ).catch(function(e) {
-        console.log(e);
-    })
-}
-
-function getTasks() {
-    var url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
-    return makeGetRequest(url);
+    return item;
 }
 
 function getDescription() {
-    return document.getElementById("input");
+    return document.getElementById("input").value;
 }
 
 function getEmail() {
-    return document.getElementById("email");
+    return document.getElementById("email").value;
 
 }
 
 function getName() {
-    return document.getElementById("name");
+    return document.getElementById("name").value;
 
 }
 
 function getTimeEstimate() {
-    return document.getElementById("number");
+    return document.getElementById("number").value;
 }
 
 function getDueDate() {
-    return document.getElementById("date");
+    return document.getElementById("date").value;
 }
 
 function setWaitTime() {
 
 }
 
-function makePostRequest(url, data) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            var json = JSON.parse(xhr.responseText);
-            console.log(json);
+function displayTotalNumberOfTasks() {
+    var elem = document.getElementById("total-tasks");
+    var total = 0;
+
+    getTasks().then(
+        function (tasks) {
+            for (var i = 0; i < tasks.length; i++) {
+                total += tasks[i].timeEstimate;
+            }
+            elem.value = total;
         }
-    };
-    xhr.send(JSON.stringify(data));
+    ).catch(function (e) {
+        console.log(e);
+    })
+
+
+}
+
+function editItem() {
+
+}
+
+function makePostRequest(url, data) {
+    return new Promise(
+        function (resolve, rejet) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onload = function () {
+                var json = JSON.parse(xhr.responseText);
+                resolve(json);
+            };
+            xhr.onerror = function () {
+                reject(xhr.statusText);
+            };
+            xhr.send(JSON.stringify(data));
+
+        }
+    )
+
+
 }
 
 function makeGetRequest(url) {
@@ -129,17 +163,35 @@ function makeGetRequest(url) {
         function (resolve, reject) {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
-            //xhr.setRequestHeader("Content-type", "application/json");
+            xhr.setRequestHeader("Content-type", "application/json");
             xhr.onload = function () {
                 var json = JSON.parse(xhr.responseText);
                 resolve(json);
             };
-            xhr.onerror = function() {
+            xhr.onerror = function () {
                 reject(xhr.statusText);
             };
             xhr.send();
 
         }
     )
+}
 
+function makeDeleteRequest(url) {
+    return new Promise(
+        function (resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("DELETE", url, true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onload = function () {
+                var json = JSON.parse(xhr.responseText);
+                resolve(json);
+            };
+            xhr.onerror = function () {
+                reject(xhr.statusText);
+            };
+            xhr.send();
+
+        }
+    )
 }
