@@ -35,3 +35,6 @@ ul input + label {
     margin-left: 0.5em;
 }
 
+#menu ul > li {
+    display: inline-block;
+}
