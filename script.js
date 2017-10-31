@@ -6,6 +6,10 @@ function init() {
     displayTotalNumberOfTasks();
 }
 
+function checkItemOwner() {
+    var userId = prompt("Please enter your email");
+}
+
 
 function removeItem(event) {
     deleteTask("123").then(
@@ -135,11 +139,12 @@ function displayTotalNumberOfTasks() {
 
 function editItem() {
 
+
 }
 
 function makePostRequest(url, data) {
     return new Promise(
-        function (resolve, rejet) {
+        function (resolve, reject) {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", url, true);
             xhr.setRequestHeader("Content-type", "application/json");
