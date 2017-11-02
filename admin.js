@@ -1,13 +1,27 @@
 window.addEventListener('load', init);
 
 function init() {
+    document.getElementById('button').addEventListener('click', addList);
     displayLists();
 }
 
-const url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
+const url_get = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
+const url_post = "https://my.api.mockaroo.com/createresponse.json?key=835b6af0";
 
-function createList(url) {
+function addList() {
+    let listTitle = getListTitle();
+    createList(url_post, listTitle)
+        .then(() => displayList(listTitle))
+        .catch((e) => console.error(e))
+}
 
+function getListTitle() {
+    return document.getElementById("title").value;
+}
+
+
+function createList(url, data) {
+    return makePostRequest(url, data);
 }
 
 function deleteList() {
@@ -16,7 +30,7 @@ function deleteList() {
 }
 
 function displayLists() {
-    getLists(url).then(function (lists) {
+    getLists(url_get).then(function (lists) {
         for (var i = 0; i < lists.length; i++) {
             displayList(lists[i].description);
         }
@@ -72,10 +86,11 @@ function makePostRequest(url, data) {
 
 function displayList(description) {
     var newContent = document.createTextNode(description);
-    var label = document.createElement("label");
-    label.appendChild(newContent);
+    var link = document.createElement("a");
+    link.appendChild(newContent);
+    link.setAttribute("href", "");
     var newLi = document.createElement("li");
-    newLi.appendChild(label);
+    newLi.appendChild(link);
 
     document.getElementById("list").appendChild(newLi);
 }
