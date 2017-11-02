@@ -1,16 +1,24 @@
-function createList() {
-    var url;
+window.addEventListener('load', init);
+
+function init() {
+    displayLists();
+}
+
+const url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
+
+function createList(url) {
 
 }
 
 function deleteList() {
+    var url;
 
 }
 
 function displayLists() {
-    getLists().then(function (lists) {
-        for (var i = 0; i < lists.length(); i++) {
-            displayList(lists[i].url);
+    getLists(url).then(function (lists) {
+        for (var i = 0; i < lists.length; i++) {
+            displayList(lists[i].description);
         }
     }).catch(function (e) {
         console.log(e);
@@ -18,9 +26,8 @@ function displayLists() {
 }
 
 
-function getLists() {
-    var url;
-    return makeGetRequest;
+function getLists(url) {
+    return makeGetRequest(url);
 }
 
 function makeGetRequest(url) {
