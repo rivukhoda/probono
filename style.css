@@ -38,3 +38,7 @@ ul input + label {
 #menu ul > li {
     display: inline-block;
 }
+
+ul button + a {
+    margin-left: 0.5em;
+}
