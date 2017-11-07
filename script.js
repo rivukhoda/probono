@@ -2,8 +2,26 @@ window.addEventListener('load', init);
 
 function init() {
     document.getElementById("button").addEventListener('click', addItem);
-    displayItems();
-    displayTotalNumberOfTasks();
+    const givenTasks = getTasks();
+
+    givenTasks
+        .then((tasks) => displayItems(tasks))
+        .catch((e) => console.log(e));
+
+    displayStats(givenTasks);
+
+}
+
+function displayStats(givenTasks) {
+    givenTasks
+        .then((tasks) => computeTotalEstimatedWaitTime(tasks))
+        .then((ewt) => displayEstimatedWaitTime(ewt))
+        .catch((e) => console.error(e));
+
+    givenTasks
+        .then((tasks) => computeTotalNumberOfTasks(tasks))
+        .then((numberOfTasks) => displayTotalNumberOfTasks(numberOfTasks))
+        .catch((e) => console.error(e));
 }
 
 function checkItemOwner() {
@@ -28,18 +46,12 @@ function deleteTask(taskId) {
 }
 
 
-function displayItems() {
-
-    getTasks().then(
-        function (tasks) {
-            for (var i = 0; i < tasks.length; i++) {
-                displayItem(tasks[i].description);
-            }
-        }
-    ).catch(function (e) {
-        console.log(e);
-    })
+function displayItems(tasks) {
+    for (var i = 0; i < tasks.length; i++) {
+        displayItem(tasks[i].description);
+    }
 }
+
 
 function displayItem(description) {
     var newContent = document.createTextNode(description);
@@ -115,25 +127,32 @@ function getDueDate() {
     return document.getElementById("date").value;
 }
 
-function setWaitTime() {
+function computeTotalEstimatedWaitTime(tasks) {
+
+    let totalEstimatedWaitTime = 0;
+    for (let task of tasks) {
+        totalEstimatedWaitTime += task.timeEstimate;
+    }
+    return totalEstimatedWaitTime;
+
 
 }
 
-function displayTotalNumberOfTasks() {
-    var elem = document.getElementById("total-tasks");
-    var total = 0;
+function displayEstimatedWaitTime(ewt) {
+    let twetNode = document.createTextNode(ewt + ' hours');
+    let elem = document.getElementById('wait-time');
+    elem.appendChild(twetNode);
 
-    getTasks().then(
-        function (tasks) {
-            for (var i = 0; i < tasks.length; i++) {
-                total += tasks[i].timeEstimate;
-            }
-            elem.value = total;
-        }
-    ).catch(function (e) {
-        console.log(e);
-    })
+}
+function computeTotalNumberOfTasks(tasks) {
+    return tasks.length;
+}
 
+
+function displayTotalNumberOfTasks(numberOfTasks) {
+    let node = document.createTextNode(numberOfTasks + ' items');
+    let elem = document.getElementById("total-tasks");
+    elem.appendChild(node);
 
 }
 
