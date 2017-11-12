@@ -122,7 +122,7 @@ function displayList(description) {
     var newContent = document.createTextNode(description);
     var link = document.createElement("a");
     link.appendChild(newContent);
-    link.setAttribute("href", "");
+    link.setAttribute("href", "./index.html");
 
     let removeButton = document.createElement("button");
     let removeIcon = document.createTextNode("x");
