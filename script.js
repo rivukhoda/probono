@@ -26,19 +26,29 @@ function displayStats(givenTasks) {
 
 function checkItemOwner() {
     var userId = prompt("Please enter your email");
+    return authenticate(userId);
+}
+
+
+function authenticate(userId) {
+    const url_auth = "https://my.api.mockaroo.com/createresponse.json?key=835b6af0";
+    return makePostRequest(url_auth, userId);
 }
 
 
 function removeItem(event) {
-    deleteTask("123").then(
-        function () {
-            event.target.parentNode.remove()
-        }
-    ).catch(function (e) {
-        console.log(e);
-    })
-
+    checkItemOwner()
+        .then(() => {
+            deleteTask("123")
+                .then(() => event.target.parentNode.remove())
+                .catch((e) => console.log(e));
+        })
+        .catch((e) => {
+            window.alert("Your credentials are not correct, please try again.");
+            console.log(e);
+        })
 }
+
 
 function deleteTask(taskId) {
     var url = "https://my.api.mockaroo.com/deleteresponse/" + taskId + ".json?key=835b6af0";
@@ -134,8 +144,6 @@ function computeTotalEstimatedWaitTime(tasks) {
         totalEstimatedWaitTime += task.timeEstimate;
     }
     return totalEstimatedWaitTime;
-
-
 }
 
 function displayEstimatedWaitTime(ewt) {
@@ -154,6 +162,28 @@ function displayTotalNumberOfTasks(numberOfTasks) {
     let elem = document.getElementById("total-tasks");
     elem.appendChild(node);
 
+}
+
+function getTotalRequestsCompleted() {
+    let url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
+    return makeGetRequest(url);
+}
+
+function displayTotalRequestsCompleted() {
+    let node = document.createTextNode(trc);
+    let elem = document.getElementById('total-requests');
+    elem.appendChild(node);
+}
+
+function getTotalWorkedHours() {
+    let url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
+    return makeGetRequest(url);
+}
+
+function displayTotalWorkedHours() {
+    let node = document.createTextNode(twh);
+    let elem = document.getElementById('total-hours');
+    elem.appendChild(node);
 }
 
 function editItem() {
