@@ -1,6 +1,21 @@
 from flask import Flask
+import mysql.connector
 
 app = Flask(__name__)
+app.config.from_object('settings.DevelopmentConfig')
+
+db_config = {}
+
+db_config['user'] = app.config['DB_USER']
+db_config['password'] = app.config['DB_PWD']
+db_config['database'] = app.config['DB_NAME']
+db_config['host'] = app.config['DB_HOST']
+db_config['port'] = app.config['DB_PORT']
+
+
+cnx = mysql.connector.connect(**db_config)
+
+
 
 
 @app.route('/')
@@ -28,7 +43,7 @@ def get_lists():
     return
 
 
-@app.route('/lists', method=['POST'])
+@app.route('/lists', methods=['POST'])
 def create_list():
     return
 
