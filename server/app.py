@@ -25,6 +25,7 @@ insert_user = ("INSERT INTO user (email, password) VALUES (%(email)s, %(PASSWORD
 query_user = ("SELECT password FROM user WHERE email = %(email)s")
 
 insert_list = ("INSERT INTO list (name, user_id) VALUES (%(NAME)s, %(user_id)s)")
+query_lists = ("SELECT name, id FROM list WHERE user_id = %(user_id)s")
 
 
 @app.route('/')
@@ -71,7 +72,16 @@ def remove_task(id):
 
 @app.route('/lists', methods=['GET'])
 def get_lists():
-    return
+    value = request.args.get('id')
+    user_id = {"user_id": value}
+    cursor.execute(query_lists, user_id)
+    lists = []
+
+    for (name, id) in cursor:
+        todo_list = {"name": name, "id": id}
+        lists.append(todo_list)
+
+    return jsonify(status=200, lists=lists)
 
 
 @app.route('/lists', methods=['POST'])
