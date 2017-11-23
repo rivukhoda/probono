@@ -26,6 +26,7 @@ query_user = ("SELECT password FROM user WHERE email = %(email)s")
 
 insert_list = ("INSERT INTO list (name, user_id) VALUES (%(NAME)s, %(user_id)s)")
 query_lists = ("SELECT name, id FROM list WHERE user_id = %(user_id)s")
+update_list = ("UPDATE list SET user_id = NULL WHERE id = %(list_id)s")
 
 
 @app.route('/')
@@ -93,8 +94,11 @@ def create_list():
 
 
 @app.route('/lists/<id>', methods=['DELETE'])
-def delete_list():
-    return
+def remove_list(id):
+    list_data = {"list_id": id}
+    cursor.execute(update_list, list_data)
+    cnx.commit()
+    return jsonify(status=200, message="list removed successfully")
 
 
 @app.route('/session', methods=['POST'])
