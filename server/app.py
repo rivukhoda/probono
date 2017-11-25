@@ -13,7 +13,7 @@ db_config['host'] = app.config['DB_HOST']
 db_config['port'] = app.config['DB_PORT']
 
 cnx = mysql.connector.connect(**db_config)
-cursor = cnx.cursor()
+cursor = cnx.cursor(buffered=True)
 
 insert_task = ("INSERT INTO task "
                "(requester, email, description, time_frame, due_date, list_id)"
@@ -21,7 +21,7 @@ insert_task = ("INSERT INTO task "
 query_tasks = ("SELECT requester, email, description, time_frame, due_date FROM task WHERE list_id = %(list_id)s")
 update_task = ("UPDATE task SET list_id = NULL WHERE id = %(task_id)s")
 
-insert_user = ("INSERT INTO user (email, password) VALUES (%(email)s, %(PASSWORD)s)")
+insert_user = ("INSERT INTO user (email, password) VALUES (%(email)s, %(password)s)")
 query_user = ("SELECT password FROM user WHERE email = %(email)s")
 
 insert_list = ("INSERT INTO list (name, user_id) VALUES (%(NAME)s, %(user_id)s)")
