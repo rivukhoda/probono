@@ -1,5 +1,7 @@
 window.addEventListener('load', init);
 
+const server = "http://localhost:5000";
+
 function init() {
     document.getElementById("button").addEventListener('click', addItem);
     const givenTasks = getTasks();
@@ -56,9 +58,10 @@ function deleteTask(taskId) {
 }
 
 
-function displayItems(tasks) {
-    for (var i = 0; i < tasks.length; i++) {
-        displayItem(tasks[i].description);
+function displayItems(data) {
+
+    for (var i = 0; i < data["tasks"].length; i++) {
+        displayItem(data["tasks"][i].description);
     }
 }
 
@@ -82,8 +85,8 @@ function displayItem(description) {
 }
 
 function getTasks() {
-    var url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
-    return makeGetRequest(url);
+    const url_tasks = server + '/tasks?list_id=4';
+    return makeGetRequest(url_tasks);
 }
 
 function addItem() {
