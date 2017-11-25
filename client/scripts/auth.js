@@ -1,7 +1,10 @@
 window.addEventListener('load', init);
 
+const server = "http://localhost:5000";
+
 function init() {
-    document.getElementById("button").addEventListener('click', signin);
+    document.getElementById("signin").addEventListener('click', signin);
+    // document.getElementById("register").addEventListener('click', register);
 }
 
 function signin() {
@@ -18,10 +21,8 @@ function register() {
 }
 
 
-
-
 function createUser() {
-    const url_new = "https://my.api.mockaroo.com/createresponse.json?key=835b6af0";
+    const url_new = server + '/users';
     const newUserCredentials = getUserCredentials();
     return makePostRequest(url_new, newUserCredentials);
 }
@@ -32,17 +33,15 @@ function displayAdminPage() {
 
 
 function authenticate() {
-    const url_auth = "https://my.api.mockaroo.com/createresponse.json?key=835b6af0";
+    const url_auth = server + '/session';
     const userCredentials = getUserCredentials();
     return makePostRequest(url_auth, userCredentials);
 }
 
 
 function getUserCredentials() {
-   return {"email" : getEmail(), "password": getPassword()};
+    return {"email": getEmail(), "password": getPassword()};
 }
-
-
 
 
 function getEmail() {
@@ -59,7 +58,6 @@ function getPassword() {
 function getConfirmedPassWord() {
     return document.getElementById("confirmed-password").value;
 }
-
 
 
 function makePostRequest(url, data) {
