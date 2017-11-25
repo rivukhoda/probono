@@ -24,7 +24,7 @@ update_task = ("UPDATE task SET list_id = NULL WHERE id = %(task_id)s")
 insert_user = ("INSERT INTO user (email, password) VALUES (%(email)s, %(password)s)")
 query_user = ("SELECT password FROM user WHERE email = %(email)s")
 
-insert_list = ("INSERT INTO list (name, user_id) VALUES (%(NAME)s, %(user_id)s)")
+insert_list = ("INSERT INTO list (name, user_id) VALUES (%(name)s, %(user_id)s)")
 query_lists = ("SELECT name, id FROM list WHERE user_id = %(user_id)s")
 update_list = ("UPDATE list SET user_id = NULL WHERE id = %(list_id)s")
 
