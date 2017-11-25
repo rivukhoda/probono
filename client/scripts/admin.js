@@ -5,8 +5,10 @@ function init() {
     displayLists();
 }
 
+const server = "http://localhost:5000";
 const url_get = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
 const url_post = "https://my.api.mockaroo.com/createresponse.json?key=835b6af0";
+const url_lists = server + "/lists";
 
 function formDeleteUrl(id) {
     return "https://my.api.mockaroo.com/deleteresponse/" + id + ".json?key=835b6af0";
@@ -16,7 +18,7 @@ function formDeleteUrl(id) {
 
 function addList() {
     let listTitle = getListTitle();
-    createList(url_post, listTitle)
+    createList(url_lists, listTitle)
         .then(() => displayList(listTitle))
         .catch((e) => console.error(e))
 }
@@ -27,7 +29,8 @@ function getListTitle() {
 
 
 function createList(url, data) {
-    return makePostRequest(url, data);
+    const newList = { "name": data, "user_id": "2"};
+    return makePostRequest(url, newList);
 }
 
 function removeList(event) {
@@ -44,9 +47,9 @@ function deleteList(listId) {
 }
 
 function displayLists() {
-    getLists().then(function (lists) {
-        for (var i = 0; i < lists.length; i++) {
-            displayList(lists[i].description);
+    getLists().then((data) => {
+        for (var i = 0; i < data["lists"].length; i++) {
+            displayList(data["lists"][i].name);
         }
     }).catch(function (e) {
         console.log(e);
@@ -55,7 +58,8 @@ function displayLists() {
 
 
 function getLists() {
-    return makeGetRequest(url_get);
+    const url_lists = server + '/lists?id=2';
+    return makeGetRequest(url_lists);
 }
 
 function makeGetRequest(url) {
