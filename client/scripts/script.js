@@ -116,7 +116,7 @@ function displayItem(item) {
     newLi.setAttribute("id", item.id);
     newLi.appendChild(checkBox);
     newLi.appendChild(label);
-    newLi.appendChild(date);
+    newLi.appendChild(span);
 
     document.getElementById("list").appendChild(newLi);
 
