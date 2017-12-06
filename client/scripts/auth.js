@@ -3,8 +3,17 @@ window.addEventListener('load', init);
 const server = "http://localhost:5000";
 
 function init() {
-    document.getElementById("signin").addEventListener('click', signin);
-    // document.getElementById("register").addEventListener('click', register);
+    let signinButton = document.getElementById("signin");
+    let registerButton = document.getElementById("register");
+
+    if (signinButton) {
+        signinButton.addEventListener('click', signin)
+    }
+    else if (registerButton) {
+        registerButton.addEventListener('click', register);
+    }
+
+
 }
 
 function signin() {
@@ -16,7 +25,10 @@ function signin() {
 
 function register() {
     createUser()
-        .then(() => displayAdminPage())
+        .then((data) => {
+            document.cookie = "user_id="+data.user_id;
+            displayAdminPage();
+        })
         .catch((e) => console.error(e))
 }
 
