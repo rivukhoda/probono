@@ -18,11 +18,13 @@ cursor = cnx.cursor(buffered=True)
 insert_task = ("INSERT INTO task "
                "(requester, email, description, time_frame, due_date, list_id)"
                " VALUES (%(requester)s, %(email)s, %(description)s, %(time_frame)s, %(due_date)s, %(list_id)s)")
-query_tasks = ("SELECT requester, email, description, time_frame, due_date FROM task WHERE list_id = %(list_id)s")
+query_tasks = ("SELECT id, requester, email, description, time_frame, due_date FROM task WHERE list_id = %(list_id)s")
 update_task = ("UPDATE task SET list_id = NULL WHERE id = %(task_id)s")
 
+query_task = ("SELECT email FROM task WHERE id = %(task_id)s")
+
 insert_user = ("INSERT INTO user (email, password) VALUES (%(email)s, %(password)s)")
-query_user = ("SELECT password FROM user WHERE email = %(email)s")
+query_user = ("SELECT password, id FROM user WHERE email = %(email)s")
 
 insert_list = ("INSERT INTO list (name, user_id) VALUES (%(name)s, %(user_id)s)")
 query_lists = ("SELECT name, id FROM list WHERE user_id = %(user_id)s")
@@ -41,8 +43,9 @@ def get_tasks():
     cursor.execute(query_tasks, list_id)
     tasks = []
 
-    for (requester, email, description, time_frame, due_date) in cursor:
+    for (id, requester, email, description, time_frame, due_date) in cursor:
         task = {
+            "id": id,
             "requester": requester,
             "email": email,
             "description": description,
@@ -53,6 +56,18 @@ def get_tasks():
         tasks.append(task)
 
     return jsonify(status=200, tasks=tasks)
+
+
+@app.route('/auth', methods=['PUT'])
+def validate_task_owner():
+    owner_data = request.get_json()
+    cursor.execute(query_task, owner_data)
+    email = cursor.fetchone()[0]
+
+    if owner_data['email'] == email:
+        return jsonify(status=200, message="is a valid owner")
+    else:
+        return jsonify(status=400, message="is not a valid owner"), 400
 
 
 @app.route('/tasks', methods=['POST'])
@@ -123,7 +138,11 @@ def create_user():
     user_data = request.get_json()
     cursor.execute(insert_user, user_data)
     cnx.commit()
-    return jsonify(status=200, message="user registered successfully")
+
+    cursor.execute(query_user, user_data)
+    user_id = cursor.fetchone()[1]
+
+    return jsonify(status=200, message="user registered successfully", user_id=user_id)
 
 
 if __name__ == "__main__":
