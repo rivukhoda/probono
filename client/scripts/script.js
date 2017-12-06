@@ -1,10 +1,17 @@
 window.addEventListener('load', init);
 
 const server = "http://localhost:5000";
+let storedTasks = [];
+const params = new URLSearchParams(location.search.slice(1));
 
 function init() {
     document.getElementById("button").addEventListener('click', addItem);
-    const givenTasks = getTasks();
+    displayUIStates();
+
+}
+
+function displayUIStates() {
+    let givenTasks = getTasks();
 
     givenTasks
         .then((tasks) => displayItems(tasks))
@@ -12,80 +19,111 @@ function init() {
 
     displayStats(givenTasks);
 
+    givenTasks
+        .then((data) => storedTasks = data);
+
+
 }
 
 function displayStats(givenTasks) {
     givenTasks
-        .then((tasks) => computeTotalEstimatedWaitTime(tasks))
+        .then((data) => computeTotalEstimatedWaitTime(data['tasks']))
         .then((ewt) => displayEstimatedWaitTime(ewt))
         .catch((e) => console.error(e));
 
     givenTasks
-        .then((tasks) => computeTotalNumberOfTasks(tasks))
+        .then((data) => computeTotalNumberOfTasks(data['tasks']))
         .then((numberOfTasks) => displayTotalNumberOfTasks(numberOfTasks))
         .catch((e) => console.error(e));
 }
 
-function checkItemOwner() {
-    var userId = prompt("Please enter your email");
-    return authenticate(userId);
+function checkItemOwner(taskId) {
+    var email = prompt("Please enter your email");
+    return authenticate({"email": email, "task_id": taskId});
 }
 
 
-function authenticate(userId) {
-    const url_auth = "https://my.api.mockaroo.com/createresponse.json?key=835b6af0";
-    return makePostRequest(url_auth, userId);
+function authenticate(data) {
+    const url_auth = server + "/auth";
+    return makePutRequest(url_auth, data)
+        .then((response) => {
+            if (response.status == "400") {
+                throw response.message;
+            }
+        });
+}
+
+function uncheckItem(id) {
+    document.getElementById(id).firstElementChild.checked = false;
 }
 
 
 function removeItem(event) {
-    checkItemOwner()
+    const taskId = event.target.parentNode.getAttribute("id");
+    checkItemOwner(taskId)
         .then(() => {
-            deleteTask("123")
+            deleteTask(taskId)
                 .then(() => event.target.parentNode.remove())
                 .catch((e) => console.log(e));
         })
         .catch((e) => {
+            uncheckItem(taskId);
             window.alert("Your credentials are not correct, please try again.");
-            console.log(e);
+            console.error(e);
         })
 }
 
 
 function deleteTask(taskId) {
-    var url = "https://my.api.mockaroo.com/deleteresponse/" + taskId + ".json?key=835b6af0";
-    return makeDeleteRequest(url);
+    const url_delete = server + '/tasks/' + taskId;
+    return makeDeleteRequest(url_delete);
 }
 
 
 function displayItems(data) {
-
+    document.getElementById("list").innerHTML = '';
     for (var i = 0; i < data["tasks"].length; i++) {
-        displayItem(data["tasks"][i].description);
+        displayItem(data["tasks"][i]);
     }
 }
 
+function formatDate(date) {
+    var parsedDate = new Date(date);
+    return parsedDate.getMonth() + "/" + parsedDate.getDate() + "/" + parsedDate.getFullYear();
 
-function displayItem(description) {
-    var newContent = document.createTextNode(description);
+
+
+}
+
+
+function displayItem(item) {
+
 
     var checkBox = document.createElement("input");
     checkBox.setAttribute("type", "checkbox");
     checkBox.addEventListener('change', removeItem);
 
+
     var label = document.createElement("label");
+    var newContent = document.createTextNode(item.description);
     label.appendChild(newContent);
 
+    var span = document.createElement("span");
+    var date = document.createTextNode(formatDate(item.due_date));
+    span.appendChild(date);
+
     var newLi = document.createElement("li");
+    newLi.setAttribute("id", item.id);
     newLi.appendChild(checkBox);
     newLi.appendChild(label);
+    newLi.appendChild(date);
 
     document.getElementById("list").appendChild(newLi);
 
 }
 
 function getTasks() {
-    const url_tasks = server + '/tasks?list_id=4';
+    const url_tasks = server + '/tasks?list_id=' + params.get("id");
     return makeGetRequest(url_tasks);
 }
 
@@ -93,7 +131,7 @@ function addItem() {
     var todo = createItem();
     createTask(todo).then(
         function () {
-            displayItem(todo.description);
+            displayUIStates();
         }
     ).catch(function (e) {
         console.log(e);
@@ -103,17 +141,18 @@ function addItem() {
 }
 
 function createTask(data) {
-    var url = "https://my.api.mockaroo.com/createresponse.json?key=835b6af0";
-    return makePostRequest(url, data);
+    const url_create = server + "/tasks";
+    return makePostRequest(url_create, data);
 }
 
 function createItem() {
     var item = {
-        "name": getName(),
+        "requester": getName(),
         "email": getEmail(),
         "description": getDescription(),
-        "timeEstimate": getTimeEstimate(),
-        "dueDate": getDueDate()
+        "time_frame": getTimeEstimate(),
+        "due_date": getDueDate(),
+        "list_id": params.get("id")
     };
     return item;
 }
@@ -144,7 +183,7 @@ function computeTotalEstimatedWaitTime(tasks) {
 
     let totalEstimatedWaitTime = 0;
     for (let task of tasks) {
-        totalEstimatedWaitTime += task.timeEstimate;
+        totalEstimatedWaitTime += task.time_frame;
     }
     return totalEstimatedWaitTime;
 }
@@ -152,9 +191,11 @@ function computeTotalEstimatedWaitTime(tasks) {
 function displayEstimatedWaitTime(ewt) {
     let twetNode = document.createTextNode(ewt + ' hours');
     let elem = document.getElementById('wait-time');
+    elem.innerHTML = 'Estimated wait time: ';
     elem.appendChild(twetNode);
 
 }
+
 function computeTotalNumberOfTasks(tasks) {
     return tasks.length;
 }
@@ -163,6 +204,7 @@ function computeTotalNumberOfTasks(tasks) {
 function displayTotalNumberOfTasks(numberOfTasks) {
     let node = document.createTextNode(numberOfTasks + ' items');
     let elem = document.getElementById("total-tasks");
+    elem.innerHTML = 'Total number of requests: ';
     elem.appendChild(node);
 
 }
@@ -251,4 +293,25 @@ function makeDeleteRequest(url) {
 
         }
     )
+}
+
+function makePutRequest(url, data) {
+    return new Promise(
+        function (resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("PUT", url, true);
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.onload = function () {
+                var json = JSON.parse(xhr.responseText);
+                resolve(json);
+            };
+            xhr.onerror = function () {
+                reject(xhr.statusText);
+            };
+            xhr.send(JSON.stringify(data));
+
+        }
+    )
+
+
 }
