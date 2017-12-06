@@ -6,20 +6,13 @@ function init() {
 }
 
 const server = "http://localhost:5000";
-const url_get = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
-const url_post = "https://my.api.mockaroo.com/createresponse.json?key=835b6af0";
 const url_lists = server + "/lists";
-
-function formDeleteUrl(id) {
-    return "https://my.api.mockaroo.com/deleteresponse/" + id + ".json?key=835b6af0";
-
-}
 
 
 function addList() {
     let listTitle = getListTitle();
     createList(url_lists, listTitle)
-        .then(() => displayList(listTitle))
+        .then(() => displayLists())
         .catch((e) => console.error(e))
 }
 
@@ -29,19 +22,20 @@ function getListTitle() {
 
 
 function createList(url, data) {
-    const newList = { "name": data, "user_id": "2"};
+    const newList = {"name": data, "user_id": getCookie("user_id")};
     return makePostRequest(url, newList);
 }
 
 function removeList(event) {
-    deleteList("123")
+    const listId = event.target.parentNode.getAttribute("id");
+    deleteList(listId)
         .then(() => event.target.parentNode.remove())
         .catch((e) => console.error(e))
 }
 
 
 function deleteList(listId) {
-    const url_delete = formDeleteUrl(listId);
+    const url_delete = server + "/lists/" + listId;
     return makeDeleteRequest(url_delete);
 
 }
@@ -49,7 +43,7 @@ function deleteList(listId) {
 function displayLists() {
     getLists().then((data) => {
         for (var i = 0; i < data["lists"].length; i++) {
-            displayList(data["lists"][i].name);
+            displayList(data["lists"][i]);
         }
     }).catch(function (e) {
         console.log(e);
@@ -58,8 +52,8 @@ function displayLists() {
 
 
 function getLists() {
-    const url_lists = server + '/lists?id=2';
-    return makeGetRequest(url_lists);
+    const url = url_lists + '?id=' + getCookie("user_id");
+    return makeGetRequest(url);
 }
 
 function makeGetRequest(url) {
@@ -122,11 +116,11 @@ function makeDeleteRequest(url) {
 }
 
 
-function displayList(description) {
-    var newContent = document.createTextNode(description);
+function displayList(list) {
+    var newContent = document.createTextNode(list.name);
     var link = document.createElement("a");
     link.appendChild(newContent);
-    link.setAttribute("href", "./index.html");
+    link.setAttribute("href", "./index.html?id="+list.id);
 
     let removeButton = document.createElement("button");
     let removeIcon = document.createTextNode("x");
@@ -134,9 +128,26 @@ function displayList(description) {
     removeButton.addEventListener('click', removeList);
 
     var newLi = document.createElement("li");
+    newLi.setAttribute("id", list.id);
     newLi.appendChild(removeButton);
     newLi.appendChild(link);
 
 
     document.getElementById("list").appendChild(newLi);
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
 }
