@@ -42,3 +42,7 @@ ul input + label {
 ul button + a {
     margin-left: 0.5em;
 }
+
+* {
+    font-family: 'Open Sans', sans-serif;
+}
