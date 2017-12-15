@@ -1,3 +1,5 @@
+import * as http from "./http-utils";
+
 window.addEventListener('load', init);
 
 const server = "http://localhost:5000";
@@ -124,7 +126,7 @@ function displayItem(item) {
 
 function getTasks() {
     const url_tasks = server + '/tasks?list_id=' + params.get("id");
-    return makeGetRequest(url_tasks);
+    return http.makeGetRequest(url_tasks);
 }
 
 function addItem() {
@@ -222,6 +224,7 @@ function displayTotalRequestsCompleted() {
 
 function getTotalWorkedHours() {
     let url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
+    return http.makeGetRequest(url);
     return makeGetRequest(url);
 }
 
