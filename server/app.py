@@ -1,8 +1,15 @@
 from flask import Flask, request, Response, jsonify
+from flask_cors import CORS
 import mysql.connector
 
+import pickle
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+
 app = Flask(__name__)
+CORS(app)
 app.config.from_object('settings.DevelopmentConfig')
+
 
 db_config = {}
 
@@ -14,6 +21,14 @@ db_config['port'] = app.config['DB_PORT']
 
 cnx = mysql.connector.connect(**db_config)
 cursor = cnx.cursor(buffered=True)
+
+regressor = ''
+with open('regressor.pkl') as f:
+    regressor = pickle.load(f)
+
+vectorizer = ''
+with open('vectorizer.pkl') as f:
+    vectorizer = pickle.load(f)
 
 insert_task = ("INSERT INTO task "
                "(requester, email, description, time_frame, due_date, list_id)"
@@ -120,10 +135,10 @@ def remove_list(id):
 def login_user():
     user_data = request.get_json()
     cursor.execute(query_user, user_data)
-    password_in_db = cursor.fetchone()[0]
+    (password_in_db, user_id) = cursor.fetchone()
 
     if (user_data['password'] == password_in_db):
-        return jsonify(status=200, message="user signed in successfully")
+        return jsonify(status=200, message="user signed in successfully", user_id=user_id)
     else:
         return jsonify(status=400, message="user credentials are incorrect or do not exist")
 
@@ -143,6 +158,18 @@ def create_user():
     user_id = cursor.fetchone()[1]
 
     return jsonify(status=200, message="user registered successfully", user_id=user_id)
+
+@app.route('/prediction', methods=['GET'])
+def predict_etc():
+    task = request.args.get('task')
+
+    t = vectorizer.transform([task])
+    etc = regressor.predict(t)
+    print etc
+
+    return jsonify(status=200, message="prediction made successfully", etc=etc[0])
+
+
 
 
 if __name__ == "__main__":
