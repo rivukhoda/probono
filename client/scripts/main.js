@@ -47,7 +47,7 @@ function checkItemOwner(taskId) {
 
 function authenticate(data) {
     const url_auth = server + "/auth";
-    return makePutRequest(url_auth, data)
+    return http.makePutRequest(url_auth, data)
         .then((response) => {
             if (response.status == "400") {
                 throw response.message;
@@ -78,7 +78,7 @@ function removeItem(event) {
 
 function deleteTask(taskId) {
     const url_delete = server + '/tasks/' + taskId;
-    return makeDeleteRequest(url_delete);
+    return http.makeDeleteRequest(url_delete);
 }
 
 
@@ -144,7 +144,7 @@ function addItem() {
 
 function createTask(data) {
     const url_create = server + "/tasks";
-    return makePostRequest(url_create, data);
+    return http.makePostRequest(url_create, data);
 }
 
 function createItem() {
@@ -212,8 +212,7 @@ function displayTotalNumberOfTasks(numberOfTasks) {
 }
 
 function getTotalRequestsCompleted() {
-    let url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
-    return makeGetRequest(url);
+    return http.makeGetRequest();
 }
 
 function displayTotalRequestsCompleted() {
@@ -223,9 +222,7 @@ function displayTotalRequestsCompleted() {
 }
 
 function getTotalWorkedHours() {
-    let url = "https://my.api.mockaroo.com/tasks.json?key=835b6af0";
-    return http.makeGetRequest(url);
-    return makeGetRequest(url);
+    return http.makeGetRequest();
 }
 
 function displayTotalWorkedHours() {
@@ -235,86 +232,6 @@ function displayTotalWorkedHours() {
 }
 
 function editItem() {
-
-
-}
-
-function makePostRequest(url, data) {
-    return new Promise(
-        function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", url, true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onload = function () {
-                var json = JSON.parse(xhr.responseText);
-                resolve(json);
-            };
-            xhr.onerror = function () {
-                reject(xhr.statusText);
-            };
-            xhr.send(JSON.stringify(data));
-
-        }
-    )
-
-
-}
-
-function makeGetRequest(url) {
-    return new Promise(
-        function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", url, true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onload = function () {
-                var json = JSON.parse(xhr.responseText);
-                resolve(json);
-            };
-            xhr.onerror = function () {
-                reject(xhr.statusText);
-            };
-            xhr.send();
-
-        }
-    )
-}
-
-function makeDeleteRequest(url) {
-    return new Promise(
-        function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("DELETE", url, true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onload = function () {
-                var json = JSON.parse(xhr.responseText);
-                resolve(json);
-            };
-            xhr.onerror = function () {
-                reject(xhr.statusText);
-            };
-            xhr.send();
-
-        }
-    )
-}
-
-function makePutRequest(url, data) {
-    return new Promise(
-        function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("PUT", url, true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onload = function () {
-                var json = JSON.parse(xhr.responseText);
-                resolve(json);
-            };
-            xhr.onerror = function () {
-                reject(xhr.statusText);
-            };
-            xhr.send(JSON.stringify(data));
-
-        }
-    )
 
 
 }

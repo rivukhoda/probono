@@ -1,3 +1,5 @@
+import * as http from "./http-utils";
+
 window.addEventListener('load', init);
 
 function init() {
@@ -23,7 +25,7 @@ function getListTitle() {
 
 function createList(url, data) {
     const newList = {"name": data, "user_id": getCookie("user_id")};
-    return makePostRequest(url, newList);
+    return http.makePostRequest(url, newList);
 }
 
 function removeList(event) {
@@ -36,7 +38,7 @@ function removeList(event) {
 
 function deleteList(listId) {
     const url_delete = server + "/lists/" + listId;
-    return makeDeleteRequest(url_delete);
+    return http.makeDeleteRequest(url_delete);
 
 }
 
@@ -53,66 +55,7 @@ function displayLists() {
 
 function getLists() {
     const url = url_lists + '?id=' + getCookie("user_id");
-    return makeGetRequest(url);
-}
-
-function makeGetRequest(url) {
-    return new Promise(
-        function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", url, true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onload = function () {
-                var json = JSON.parse(xhr.responseText);
-                resolve(json);
-            };
-            xhr.onerror = function () {
-                reject(xhr.statusText);
-            };
-            xhr.send();
-
-        }
-    )
-}
-
-function makePostRequest(url, data) {
-    return new Promise(
-        function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", url, true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onload = function () {
-                var json = JSON.parse(xhr.responseText);
-                resolve(json);
-            };
-            xhr.onerror = function () {
-                reject(xhr.statusText);
-            };
-            xhr.send(JSON.stringify(data));
-
-        }
-    )
-
-
-}
-
-function makeDeleteRequest(url) {
-    return new Promise(
-        function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("DELETE", url, true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onload = function () {
-                var json = JSON.parse(xhr.responseText);
-                resolve(json);
-            };
-            xhr.onerror = function () {
-                reject(xhr.statusText);
-            };
-            xhr.send();
-
-        }
-    )
+    return http.makeGetRequest(url);
 }
 
 
@@ -120,7 +63,7 @@ function displayList(list) {
     var newContent = document.createTextNode(list.name);
     var link = document.createElement("a");
     link.appendChild(newContent);
-    link.setAttribute("href", "./index.html?id="+list.id);
+    link.setAttribute("href", "./main.html?id=" + list.id);
 
     let removeButton = document.createElement("button");
     let removeIcon = document.createTextNode("x");
@@ -140,7 +83,7 @@ function getCookie(cname) {
     var name = cname + "=";
     var decodedCookie = decodeURIComponent(document.cookie);
     var ca = decodedCookie.split(';');
-    for(var i = 0; i <ca.length; i++) {
+    for (var i = 0; i < ca.length; i++) {
         var c = ca[i];
         while (c.charAt(0) == ' ') {
             c = c.substring(1);

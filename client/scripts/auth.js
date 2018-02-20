@@ -1,3 +1,5 @@
+import * as http from "./http-utils";
+
 window.addEventListener('load', init);
 
 const server = "http://localhost:5000";
@@ -18,7 +20,10 @@ function init() {
 
 function signin() {
     authenticate()
-        .then(() => displayAdminPage())
+        .then((data) => {
+            document.cookie = "user_id=" + data.user_id;
+            displayAdminPage()
+        })
         .catch((e) => console.error(e))
 }
 
@@ -26,7 +31,7 @@ function signin() {
 function register() {
     createUser()
         .then((data) => {
-            document.cookie = "user_id="+data.user_id;
+            document.cookie = "user_id=" + data.user_id;
             displayAdminPage();
         })
         .catch((e) => console.error(e))
@@ -36,7 +41,7 @@ function register() {
 function createUser() {
     const url_new = server + '/users';
     const newUserCredentials = getUserCredentials();
-    return makePostRequest(url_new, newUserCredentials);
+    return http.makePostRequest(url_new, newUserCredentials);
 }
 
 function displayAdminPage() {
@@ -47,7 +52,7 @@ function displayAdminPage() {
 function authenticate() {
     const url_auth = server + '/session';
     const userCredentials = getUserCredentials();
-    return makePostRequest(url_auth, userCredentials);
+    return http.makePostRequest(url_auth, userCredentials);
 }
 
 
@@ -72,23 +77,3 @@ function getConfirmedPassWord() {
 }
 
 
-function makePostRequest(url, data) {
-    return new Promise(
-        function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", url, true);
-            xhr.setRequestHeader("Content-type", "application/json");
-            xhr.onload = function () {
-                var json = JSON.parse(xhr.responseText);
-                resolve(json);
-            };
-            xhr.onerror = function () {
-                reject(xhr.statusText);
-            };
-            xhr.send(JSON.stringify(data));
-
-        }
-    )
-
-
-}
